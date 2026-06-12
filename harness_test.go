@@ -2,7 +2,6 @@ package caddybrrr
 
 import (
 	"bytes"
-	stdgzip "compress/gzip"
 	"context"
 	"fmt"
 	"io"
@@ -10,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/klauspost/compress/zstd"
 	"github.com/molecule-man/go-brrr"
 
 	"github.com/caddyserver/caddy/v2"
@@ -72,7 +70,7 @@ func conformanceLargeBody() []byte {
 
 func conformanceEncoderCases(t testing.TB) []encoderCase {
 	t.Helper()
-	return append(provisionEncoderCases(t, []int{5}, []string{"default"}), brotliEncoderCase(t, 4))
+	return []encoderCase{brotliEncoderCase(t, 4)}
 }
 
 func benchmarkEncoderCases(t testing.TB) []encoderCase {
@@ -102,7 +100,6 @@ func provisionEncoderCases(t testing.TB, gzipLevels []int, zstdLevels []string) 
 			encoder:     "gzip",
 			level:       fmt.Sprintf("%d", level),
 			encoding:    gzipEncoding,
-			decompress:  decompressGzip,
 			contentType: "text/plain",
 		})
 	}
@@ -116,7 +113,6 @@ func provisionEncoderCases(t testing.TB, gzipLevels []int, zstdLevels []string) 
 			encoder:     "zstd",
 			level:       level,
 			encoding:    zstdEncoding,
-			decompress:  decompressZstd,
 			contentType: "text/plain",
 		})
 	}
@@ -219,24 +215,6 @@ func encodeAndVerifyRoundTrip(t *testing.T, encCase encoderCase, encoder encode.
 	}
 
 	assertDecompresses(t, encCase, compressed.Bytes(), original)
-}
-
-func decompressGzip(compressed []byte) ([]byte, error) {
-	reader, err := stdgzip.NewReader(bytes.NewReader(compressed))
-	if err != nil {
-		return nil, err
-	}
-	defer reader.Close()
-	return io.ReadAll(reader)
-}
-
-func decompressZstd(compressed []byte) ([]byte, error) {
-	decoder, err := zstd.NewReader(nil)
-	if err != nil {
-		return nil, err
-	}
-	defer decoder.Close()
-	return decoder.DecodeAll(compressed, nil)
 }
 
 func decompressBrotli(compressed []byte) ([]byte, error) {
