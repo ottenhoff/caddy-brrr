@@ -4,9 +4,9 @@ go 1.25.1
 
 require (
 	github.com/andybalholm/brotli v1.2.0
-	github.com/caddyserver/caddy/v2 v2.10.2
+	github.com/caddyserver/caddy/v2 v2.11.4
 	github.com/klauspost/compress v1.18.6
-	github.com/molecule-man/go-brrr v0.0.0
+	github.com/molecule-man/go-brrr v0.5.1
 )
 
 require (
@@ -151,7 +151,3 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	howett.net/plist v1.0.0 // indirect
 )
-
-replace github.com/caddyserver/caddy/v2 => /Users/samo/go/src/github.com/caddyserver/caddy-encode-harness
-
-replace github.com/molecule-man/go-brrr => /Users/samo/go/src/github.com/molecule-man/go-brrr
