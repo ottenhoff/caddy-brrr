@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	andybrotli "github.com/andybalholm/brotli"
 	"github.com/klauspost/compress/zstd"
+	"github.com/molecule-man/go-brrr"
 
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig"
@@ -240,5 +240,7 @@ func decompressZstd(compressed []byte) ([]byte, error) {
 }
 
 func decompressBrotli(compressed []byte) ([]byte, error) {
-	return io.ReadAll(andybrotli.NewReader(bytes.NewReader(compressed)))
+	reader := brrr.NewReader(bytes.NewReader(compressed))
+	defer reader.Close()
+	return io.ReadAll(reader)
 }

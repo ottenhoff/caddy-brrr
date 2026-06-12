@@ -3,7 +3,6 @@ module github.com/ottenhoff/caddy-brrr
 go 1.25.1
 
 require (
-	github.com/andybalholm/brotli v1.2.0
 	github.com/caddyserver/caddy/v2 v2.11.4
 	github.com/klauspost/compress v1.18.6
 	github.com/molecule-man/go-brrr v0.5.1
