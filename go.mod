@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/caddyserver/caddy/v2 v2.11.4
-	github.com/molecule-man/go-brrr v0.5.1
+	github.com/molecule-man/go-brrr v1.0.0
 )
 
 require (

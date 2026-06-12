@@ -41,22 +41,23 @@ func (b *Brotli) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	return nil
 }
 
+const defaultBrotliLevel = 4
+
 // Provision provisions b's configuration.
 func (b *Brotli) Provision(ctx caddy.Context) error {
 	if b.Level == nil {
-		defaultLevel := 4
-		b.Level = &defaultLevel
+		level := defaultBrotliLevel
+		b.Level = &level
 	}
 	return nil
 }
 
 // Validate validates b's configuration.
 func (b Brotli) Validate() error {
-	level := b.level()
-	if level < brrr.BestSpeed {
+	if *b.Level < brrr.BestSpeed {
 		return fmt.Errorf("quality too low; must be >= %d", brrr.BestSpeed)
 	}
-	if level > brrr.BestCompression {
+	if *b.Level > brrr.BestCompression {
 		return fmt.Errorf("quality too high; must be <= %d", brrr.BestCompression)
 	}
 	return nil
@@ -69,18 +70,8 @@ func (Brotli) AcceptEncoding() string {
 
 // NewEncoder returns a new Brotli writer.
 func (b Brotli) NewEncoder() encode.Encoder {
-	writer, err := brrr.NewWriter(nil, b.level())
-	if err != nil {
-		panic(err)
-	}
+	writer, _ := brrr.NewWriter(nil, *b.Level)
 	return writer
-}
-
-func (b Brotli) level() int {
-	if b.Level == nil {
-		return 4
-	}
-	return *b.Level
 }
 
 var (

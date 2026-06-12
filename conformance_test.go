@@ -108,7 +108,7 @@ var encodeScenarios = []encodeScenario{
 		checkResponse: checkHeadEncodedHeaders,
 	},
 	{
-		name:      "range response bypasses encoding",
+		name:      "range partial content is encoded",
 		method:    http.MethodGet,
 		minLength: 1,
 		reqHeaders: func(encoderCase) http.Header {
@@ -124,7 +124,7 @@ var encodeScenarios = []encodeScenario{
 				return err
 			})
 		},
-		checkResponse: checkRangeResponseBypassesEncoding,
+		checkResponse: checkRangePartialContentEncoded,
 	},
 	{
 		name:      "websocket handshake bypasses encoding",
@@ -318,24 +318,25 @@ func checkHeadEncodedHeaders(t *testing.T, w *httptest.ResponseRecorder, encCase
 	}
 }
 
-func checkRangeResponseBypassesEncoding(t *testing.T, w *httptest.ResponseRecorder, encCase encoderCase) {
+func checkRangePartialContentEncoded(t *testing.T, w *httptest.ResponseRecorder, encCase encoderCase) {
 	t.Helper()
+
+	original := []byte("0123456789abcdef")
+	encName := encCase.encoding.AcceptEncoding()
 
 	if got := w.Code; got != http.StatusPartialContent {
 		t.Fatalf("status = %d, want %d", got, http.StatusPartialContent)
 	}
-	if got := w.Header().Get("Content-Encoding"); got != "" {
-		t.Fatalf("Content-Encoding = %q, want empty", got)
+	if got := w.Header().Get("Content-Encoding"); got != encName {
+		t.Fatalf("Content-Encoding = %q, want %q", got, encName)
 	}
 	if got := w.Header().Get("Content-Range"); got != "bytes 0-15/128" {
 		t.Fatalf("Content-Range = %q, want %q", got, "bytes 0-15/128")
 	}
-	if got := w.Header().Get("Accept-Ranges"); got != "bytes" {
-		t.Fatalf("Accept-Ranges = %q, want bytes", got)
+	if got := w.Header().Get("Accept-Ranges"); got != "" {
+		t.Fatalf("Accept-Ranges = %q, want empty", got)
 	}
-	if got := w.Body.String(); got != "0123456789abcdef" {
-		t.Fatalf("body = %q, want %q", got, "0123456789abcdef")
-	}
+	assertDecompresses(t, encCase, w.Body.Bytes(), original)
 }
 
 func checkWebSocketBypass(t *testing.T, w *httptest.ResponseRecorder, encCase encoderCase) {
